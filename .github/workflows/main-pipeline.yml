@@ -1,9 +1,9 @@
-name: Master - Build, Tag, Push, and Release
+name: Main - Build, Tag, Push, and Release
 
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
 
 jobs:
   get-base-ref:
@@ -21,7 +21,7 @@ jobs:
         run: echo "base_ref=$(git rev-parse HEAD~1)" >> $GITHUB_OUTPUT
 
   migration-check:
-    name: Flyway Migration Check on Master
+    name: Flyway Migration Check on Main
     needs: [ get-base-ref ]
     uses: ./.github/workflows/migrations-check.yml
     with:
@@ -161,12 +161,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Authenticate to Docker Hub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Authenticate to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
@@ -180,13 +174,13 @@ jobs:
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
-      - name: Retrieve Latest Master Version Tag
+      - name: Retrieve Latest Version Tag
         id: get_version
         run: |
           latest_tag=$(git tag --list "v*" --sort=-v:refname | head -n 1)
           latest_tag=${latest_tag:-"v0.0.0"}
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
-          echo "Latest master tag: $latest_tag"
+          echo "Latest tag: $latest_tag"
 
       - name: Determine Version Bump
         id: determine_bump
@@ -198,7 +192,7 @@ jobs:
           # Extract PR number from merge commit
           pr_number=$(git log -1 --pretty=%B | grep -oE 'Merge pull request #[0-9]+' | grep -oE '[0-9]+') || true
           if [ -z "$pr_number" ]; then
-            pr_number=$(gh pr list --state merged --base master --limit 1 --json number --jq '.[0].number')
+            pr_number=$(gh pr list --state merged --base main --limit 1 --json number --jq '.[0].number')
           fi
           echo "PR number: $pr_number"
 
@@ -306,19 +300,17 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            booklore/booklore:${{ env.new_tag }}
-            booklore/booklore:latest
-            ghcr.io/booklore-app/booklore:${{ env.new_tag }}
-            ghcr.io/booklore-app/booklore:latest
+            ghcr.io/gamcdonald123/booklore:${{ env.new_tag }}
+            ghcr.io/gamcdonald123/booklore:latest
           build-args: |
             APP_VERSION=${{ env.new_tag }}
             APP_REVISION=${{ github.sha }}
           cache-from: |
             type=gha
-            type=registry,ref=ghcr.io/booklore-app/booklore:buildcache
+            type=registry,ref=ghcr.io/gamcdonald123/booklore:buildcache
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=ghcr.io/booklore-app/booklore:buildcache,mode=max
+            type=registry,ref=ghcr.io/gamcdonald123/booklore:buildcache,mode=max
 
       - name: Update GitHub Release Draft
         uses: release-drafter/release-drafter@6db134d15f3909ccc9eefd369f02bd1e9cffdf97 # v6

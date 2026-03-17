@@ -1,7 +1,6 @@
 services:
   booklore:
-    build:
-      context: https://github.com/gamcdonald123/booklore.git#main
+    image: ghcr.io/gamcdonald123/booklore:latest
     container_name: booklore
     environment:
       - USER_ID=1000
