@@ -15,8 +15,6 @@ public class AppProperties {
     private String version;
     private RemoteAuth remoteAuth;
     private Boolean forceDisableOidc = false;
-    private Telemetry telemetry = new Telemetry();
-
     /**
      * Type of disk storage where library files are stored.
      * Defaults to LOCAL. Set to NETWORK if using NFS, SMB/CIFS, or other network-mounted storage.
@@ -42,9 +40,4 @@ public class AppProperties {
         private String groupsDelimiter = "\\s+";  // Default to whitespace for backward compatibility
     }
 
-    @Getter
-    @Setter
-    public static class Telemetry {
-        private String baseUrl = "https://telemetry.booklore.org";
-    }
 }
